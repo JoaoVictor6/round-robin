@@ -1,7 +1,7 @@
 fn main() {
     // process id's
     let processes = vec![1, 2, 3];
-    let n = processes.len();
+    let processes_length = processes.len();
 
     // Burst time of all processes
     let bt = vec![10, 5, 8];
@@ -9,22 +9,22 @@ fn main() {
     // Time quantum
     let quantum = 2;
 
-    find_average_time(processes, n, bt, quantum);
+    find_average_time(processes, processes_length, bt, quantum);
 }
 
 // Method to find the waiting time
 // for all processes
 fn find_waiting_time(
     processes: &Vec<usize>,
-    n: usize,
-    bt: &Vec<usize>,
-    wt: &mut Vec<usize>,
+    burst_time: &Vec<usize>,
+    waiting_time: &mut Vec<usize>,
     quantum: usize,
 ) {
+    let processes_length = processes.len();
     // Make a copy of burst times bt[] to store remaining burst times.
-    let mut rem_bt = vec![0; n];
-    for idx in 0..n {
-        rem_bt[idx] = bt[idx];
+    let mut rem_bt = vec![0; processes_length];
+    for idx in 0..processes_length {
+        rem_bt[idx] = burst_time[idx];
     }
 
     let mut t = 0; // current time
@@ -34,7 +34,7 @@ fn find_waiting_time(
         let mut done = true;
 
         // Traverse all processes one by one repeatedly
-        for idx in 0..n {
+        for idx in 0..processes_length {
             // if burst time of a process is greater than 0 then only need to process further
             if rem_bt[idx] > 0 {
                 // There is a pending process
@@ -54,7 +54,7 @@ fn find_waiting_time(
                     t += rem_bt[idx];
 
                     // Waiting time is current time minus burst time of this process
-                    wt[idx] = t - bt[idx];
+                    waiting_time[idx] = t - burst_time[idx];
 
                     // As the process gets fully executed make its remaining
                     // burst time = 0
@@ -73,44 +73,55 @@ fn find_waiting_time(
 // Method to calculate turn around time
 fn find_turn_around_time(
     processes: &Vec<usize>,
-    n: usize,
-    bt: &Vec<usize>,
-    wt: &Vec<usize>,
-    tat: &mut Vec<usize>,
+    burst_time: &Vec<usize>,
+    waiting_time: &Vec<usize>,
+    turnaround_time: &mut Vec<usize>,
 ) {
+    let processes_length = processes.len();
     // calculating turnaround time by adding
     // bt[idx] + wt[idx]
-    for idx in 0..n {
-        tat[idx] = bt[idx] + wt[idx];
+    for idx in 0..processes_length {
+        turnaround_time[idx] = burst_time[idx] + waiting_time[idx];
     }
 }
 
 // Function to calculate average time
-fn find_average_time(processes: Vec<usize>, n: usize, bt: Vec<usize>, quantum: usize) {
-    let mut wt = vec![0; n];
-    let mut tat = vec![0; n];
-    let mut total_wt = 0;
-    let mut total_tat = 0;
+fn find_average_time(
+    processes: Vec<usize>,
+    processes_length: usize,
+    burst_time: Vec<usize>,
+    quantum: usize,
+) {
+    let mut waiting_time = vec![0; processes_length];
+    let mut turnaround_time = vec![0; processes_length];
+    let mut total_waiting_time = 0;
+    let mut total_turnaround_time = 0;
 
     // Function to find waiting time of all processes
-    find_waiting_time(&processes, n, &bt, &mut wt, quantum);
+    find_waiting_time(&processes, &burst_time, &mut waiting_time, quantum);
 
     // Function to find turn around time of all processes
-    find_turn_around_time(&processes, n, &bt, &wt, &mut tat);
+    find_turn_around_time(&processes, &burst_time, &waiting_time, &mut turnaround_time);
 
     // Display processes along with all details
     println!("Processes  Burst time  Waiting time  Turn around time");
 
-    for idx in 0..n {
-        total_wt += wt[idx];
-        total_tat += tat[idx];
+    for idx in 0..processes_length {
+        total_waiting_time += waiting_time[idx];
+        total_turnaround_time += turnaround_time[idx];
 
         println!(
             " {}\t\t{}\t {}\t\t {}",
-            processes[idx], bt[idx], wt[idx], tat[idx]
+            processes[idx], burst_time[idx], waiting_time[idx], turnaround_time[idx]
         );
     }
 
-    println!("\nAverage waiting time = {}", total_wt as f64 / n as f64);
-    println!("Average turn around time = {}", total_tat as f64 / n as f64);
+    println!(
+        "\nAverage waiting time = {}",
+        total_waiting_time as f64 / processes_length as f64
+    );
+    println!(
+        "Average turn around time = {}",
+        total_turnaround_time as f64 / processes_length as f64
+    );
 }
