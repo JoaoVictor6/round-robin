@@ -9,22 +9,22 @@ fn main() {
     // Time quantum
     let quantum = 2;
 
-    find_average_time(processes, n, bt, quantum)
+    find_average_time(processes, n, bt, quantum);
 }
 
 // Method to find the waiting time
 // for all processes
 fn find_waiting_time(
-    processes: Vec<usize>,
+    processes: &Vec<usize>,
     n: usize,
-    bt: Vec<usize>,
-    mut wt: Vec<usize>,
+    bt: &Vec<usize>,
+    wt: &mut Vec<usize>,
     quantum: usize,
 ) {
     // Make a copy of burst times bt[] to store remaining burst times.
     let mut rem_bt = vec![0; n];
     for idx in 0..n {
-        rem_bt[idx] = bt[idx]
+        rem_bt[idx] = bt[idx];
     }
 
     let mut t = 0; // current time
@@ -47,13 +47,13 @@ fn find_waiting_time(
 
                     // Decrease the burst_time(bt) of current process by quantum
                     rem_bt[idx] -= quantum;
-                // if burst time is smalle than or equal to quantum. Last cycle for this process
+                // if burst time is smaller than or equal to quantum. Last cycle for this process
                 } else {
                     // Increase the value of t i.e.
                     // shows how much time a process has been processed
                     t += rem_bt[idx];
 
-                    // Waiting time is current time minus used by this process
+                    // Waiting time is current time minus burst time of this process
                     wt[idx] = t - bt[idx];
 
                     // As the process gets fully executed make its remaining
@@ -72,11 +72,11 @@ fn find_waiting_time(
 
 // Method to calculate turn around time
 fn find_turn_around_time(
-    processes: Vec<usize>,
+    processes: &Vec<usize>,
     n: usize,
-    bt: Vec<usize>,
-    wt: Vec<usize>,
-    mut tat: Vec<usize>,
+    bt: &Vec<usize>,
+    wt: &Vec<usize>,
+    tat: &mut Vec<usize>,
 ) {
     // calculating turnaround time by adding
     // bt[idx] + wt[idx]
@@ -87,16 +87,16 @@ fn find_turn_around_time(
 
 // Function to calculate average time
 fn find_average_time(processes: Vec<usize>, n: usize, bt: Vec<usize>, quantum: usize) {
-    let wt = vec![0; n];
-    let tat = vec![0; n];
+    let mut wt = vec![0; n];
+    let mut tat = vec![0; n];
     let mut total_wt = 0;
     let mut total_tat = 0;
 
     // Function to find waiting time of all processes
-    find_waiting_time(processes.clone(), n, bt.clone(), wt.clone(), quantum);
+    find_waiting_time(&processes, n, &bt, &mut wt, quantum);
 
-    // Function to find turn around time all processes
-    find_turn_around_time(processes, n, bt.clone(), wt.clone(), tat.clone());
+    // Function to find turn around time of all processes
+    find_turn_around_time(&processes, n, &bt, &wt, &mut tat);
 
     // Display processes along with all details
     println!("Processes  Burst time  Waiting time  Turn around time");
@@ -105,6 +105,12 @@ fn find_average_time(processes: Vec<usize>, n: usize, bt: Vec<usize>, quantum: u
         total_wt += wt[idx];
         total_tat += tat[idx];
 
-        println!(" {}\t\t{}\t {}\t\t {}", idx + 1, bt[idx], wt[idx], tat[idx]);
+        println!(
+            " {}\t\t{}\t {}\t\t {}",
+            processes[idx], bt[idx], wt[idx], tat[idx]
+        );
     }
+
+    println!("\nAverage waiting time = {}", total_wt as f64 / n as f64);
+    println!("Average turn around time = {}", total_tat as f64 / n as f64);
 }
